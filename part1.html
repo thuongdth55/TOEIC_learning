@@ -183,13 +183,17 @@
             skipEmptyLines: true,
             complete: function(results) {
                 // Lọc dữ liệu
+                console.log(Object.keys(results.data[3]))
                 allData = results.data.filter(item => {
                         // Ép kiểu stage về số và trim Status để so sánh an toàn
                         const stage = Number(item['showWordsToday']);
                         const p = item['phrase']?.toString().trim();
+                        console.log(Object.keys(item))
                         // Dùng && (Logical AND) thay vì & (Bitwise)
                         return stage > 0 && !!p;
                 });
+
+                
                 
                 // GIẢI PHÓNG BỘ NHỚ: Xóa kết quả gốc của PapaParse
                 results = null; 
