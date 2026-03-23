@@ -29,18 +29,22 @@
             width: 100%;
             overflow-y: auto; /* Chỉ cho phép cuộn bên trong nội dung thẻ nếu thẻ quá dài */
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 100px !important;
         }
 
         .flashcard {
-            min-height: 100vh;
+            /* min-height: 100vh;  <-- Xóa hoặc comment dòng này nếu muốn hiện danh sách liên tục */
             width: 100%;
             padding: 20px;
-            padding-bottom: 120px; 
+            margin-bottom: 20px; /* Tạo khoảng cách giữa các thẻ */
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Thêm đổ bóng nhẹ để phân biệt các thẻ */
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            animation: fadeIn 0.3s ease; /* Hiệu ứng chuyển trang nhẹ nhàng */
+            animation: fadeIn 0.3s ease;
         }
 
         @keyframes fadeIn {
@@ -117,32 +121,6 @@
         }
         .stroke-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: white; padding: 10px; border-radius: 15px; }
         .stroke-item { width: 100%; aspect-ratio: 1/1; object-fit: contain; }
-        
-        /* Nav Control tối ưu cho Android */
-        .nav-control {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 25px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            z-index: 9999;
-        }
-
-        .nav-btn { 
-            background: none; border: none; font-size: 24px; cursor: pointer; color: #333; 
-            touch-action: manipulation; padding: 5px 15px;
-        }
-        
-        .dots { display: flex; gap: 8px; }
-        .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; }
-        .dot.active { background: var(--primary); width: 20px; border-radius: 10px; }
 
         .ext-vocab-item { background: #f9fafb; border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .ext-vocab-item:hover {
@@ -153,6 +131,42 @@
         .ext-han { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: bold; }
         .ext-pinyin { font-size: 14px; color: var(--primary); }
         .speak-btn { background: none; border: 1px solid #eee; border-radius: 50%; cursor: pointer; }
+        .footer-action {
+                position: fixed; /* Cố định ở đáy màn hình */
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                padding: 20px;
+                background: linear-gradient(transparent, rgba(255,255,255,0.9) 30%); /* Hiệu ứng mờ nhẹ */
+                display: flex;
+                justify-content: center;
+                box-sizing: border-box;
+                z-index: 1000;
+        }
+
+        .exercise-btn {
+                width: 90%;
+                max-width: 400px;
+                padding: 15px 25px;
+                font-size: 18px;
+                font-weight: bold;
+                color: white;
+                background-color: #007bff; /* Màu xanh chủ đạo */
+                border: none;
+                border-radius: 50px; /* Bo tròn kiểu viên thuốc */
+                box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+                cursor: pointer;
+                transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .exercise-btn:active {
+                transform: scale(0.95); /* Hiệu ứng nhấn nút */
+                background-color: #0056b3;
+        }
+
+        .exercise-btn .icon {
+                margin-right: 10px;
+        }
         #loading { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; }
     </style>
 </head>
@@ -183,28 +197,24 @@
             skipEmptyLines: true,
             complete: function(results) {
                 // Lọc dữ liệu
-                console.log(Object.keys(results.data[3]))
                 allData = results.data.filter(item => {
                         // Ép kiểu stage về số và trim Status để so sánh an toàn
                         const stage = Number(item['showWordsToday']);
                         const p = item['phrase']?.toString().trim();
-                        console.log(Object.keys(item))
                         // Dùng && (Logical AND) thay vì & (Bitwise)
                         return stage > 0 && !!p;
                 });
 
-                
-                
                 // GIẢI PHÓNG BỘ NHỚ: Xóa kết quả gốc của PapaParse
                 results = null; 
 
                 const loading = document.getElementById('loading');
                 loading.style.display = 'none';
 
-                if (allData.length === 0) {
-                    document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
-                    return;
-                }
+                // if (allData.length === 0) {
+                //     document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
+                //     return;
+                // }
                 
                 totalItems = allData.length;
                 renderAllCards();
@@ -257,6 +267,11 @@ function renderAllCards() {
         `;
     }).join(''); // Nối tất cả các card thành một chuỗi HTML duy nhất
 
+    allCardsHtml += `<div class="footer-action">
+                <button class="exercise-btn" onclick="startExercise()">
+                <span class="icon">📝</span> Bài tập ôn tập
+                </button>
+        </div>`
     // 3. Ghi đè vào nội dung của book
     book.innerHTML = allCardsHtml;
     
@@ -317,6 +332,16 @@ function renderAllCards() {
         window.speechSynthesis.speak(utter);
     }
 
+    function startExercise() {
+        if (!allData || allData.length === 0) {
+                alert("Không có dữ liệu để làm bài tập!");
+                return;
+            }
+    
+        // Bạn có thể thêm logic hiển thị câu hỏi trắc nghiệm ở đây
+        alert("Tính năng 'Bài tập' đang được khởi tạo cho " + allData.length + " từ!");
+    }
+    
     function generateVocabHtml(rawData) {
         const list = parseExtendedVocab(rawData);
         if (!list.length) {
