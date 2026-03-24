@@ -204,46 +204,44 @@
             renderQuestion();
         });
 
-    function generateQuiz(satisfiedData, phrases) {
-        const set = [];
+        function generateQuiz(satisfiedData, phrases) {
+            const set = [];
     
-        // Bước 1: Trộn danh sách gốc trước
-        const shuffledSource = [...satisfiedData].sort(() => Math.random() - 0.5);
-    
-        // Bước 2: Tạo bộ câu hỏi (Lặp qua danh sách đã trộn 2 lần)
-        // Việc lặp 2 lần như thế này giúp logic rõ ràng hơn i % length
-        const doubleSource = [...shuffledSource, ...shuffledSource];
+            // Bước 1: Trộn danh sách gốc trước
+            const shuffledSource1 = [...satisfiedData].sort(() => Math.random() - 0.5);
+            const shuffledSource2 = [...satisfiedData].sort(() => Math.random() - 0.5);
+            // Bước 2: Tạo bộ câu hỏi 
+            // Việc lặp 2 lần như thế này giúp logic rõ ràng hơn i % length
+            const doubleSource = [...shuffledSource1, ...shuffledSource2];
 
-        for (let i = 0; i < doubleSource.length; i++) {
-            const current = doubleSource[i];
-            const correctAnswer = current.phrase;
+            for (let i = 0; i < doubleSource.length; i++) {
+                const current = doubleSource[i];
+                const correctAnswer = current.phrase;
 
-            // Lấy 2 đáp án nhiễu từ satisfiedData (tránh trùng đáp án đúng)
-            let wrongSatisfied = [...new Set(satisfiedData
-                .filter(item => item.phrase !== correctAnswer)
-                .map(item => item.phrase))]
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 2);
+                // Lấy 2 đáp án nhiễu từ satisfiedData (tránh trùng đáp án đúng)
+                let wrongSatisfied = [...new Set(satisfiedData
+                    .filter(item => item.phrase !== correctAnswer)
+                    .map(item => item.phrase))]
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 2);
 
-            // Lấy 1 đáp án nhiễu từ phrases (tránh trùng đáp án đúng và nhiễu trên)
-            let wrongUnique = phrases
-                .filter(p => p !== correctAnswer && !wrongSatisfied.includes(p))
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 1);
+                // Lấy 1 đáp án nhiễu từ phrases (tránh trùng đáp án đúng và nhiễu trên)
+                let wrongUnique = phrases
+                    .filter(p => p !== correctAnswer && !wrongSatisfied.includes(p))
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 1);
 
-            // Trộn 4 đáp án cho câu hỏi này
-            const options = [correctAnswer, ...wrongSatisfied, ...wrongUnique]
-                .sort(() => Math.random() - 0.5);
+                // Trộn 4 đáp án cho câu hỏi này
+                const options = [correctAnswer, ...wrongSatisfied, ...wrongUnique]
+                    .sort(() => Math.random() - 0.5);
 
-            set.push({
-                image: current.image,
-                answer: correctAnswer,
-                options: options
-            });
-        }
-
-        // Bước 3: Đảo toàn bộ bộ câu hỏi cuối cùng một lần nữa
-        return set.sort(() => Math.random() - 0.5);
+                set.push({
+                    image: current.image,
+                    answer: correctAnswer,
+                    options: options
+                });
+            }
+            return set
         }
 
         function speak_en(text) {
