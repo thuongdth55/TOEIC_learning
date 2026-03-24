@@ -203,10 +203,12 @@
 <script>
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2xrOYDoFJZacKznJW6Te5MC0Tda8XTZFqpudID_COe-D252J_vW82zg_9MmrsXltDVaAs4zRLy2Gp/pub?gid=0&single=true&output=csv';
 
-    let allData = []; // Biến chính lưu trữ dữ liệu
+    let allSatisfiedData = []; // Biến chính lưu trữ dữ liệu
     let currentIndex = 0;
     let totalItems = 0;
-
+    let uniquePhrases = [];
+    let nowPhrases = [];
+    
     function init() {
         const urlParams = new URLSearchParams(window.location.search);
         const selectedStatus = urlParams.get('status') || 'Ready';
@@ -215,20 +217,61 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
+                const maxIndex = results.length
                 // Lọc dữ liệu
-                // allData = results.data.filter(item => item['Status']?.trim() === selectedStatus);
-                allData = results.data.filter(item => {
+                // allSatisfiedData = results.data.filter(item => item['Status']?.trim() === selectedStatus);
+                allSatisfiedData = results.data.filter(item => {
                         // Ép kiểu stage về số và trim Status để so sánh an toàn
                         const stage = Number(item['showWordsToday']);
                         const p = item['phrase']?.toString().trim();
                         // Dùng && (Logical AND) thay vì & (Bitwise)
                         return stage > 0 && !!p;
                 });
+
                 
-                // if (allData.length > 0) {
+                // 1. Trích xuất danh sách các ID (STT) từ các phần tử thỏa mãn
+                const satisfiedIds = allSatisfiedData.map(item => item.STT);
+                let questionItem = [];
+                if (satisfiedIds.length > 0) {
+                    const minId = Math.min(...satisfiedIds);
+                    const maxId = Math.max(...satisfiedIds);
+
+                    // 2. Xác định các khoảng giá trị: [min-5; min] và [max; max+3]
+                    const rangeMinStart = Math.max(minId - 5, 1);
+                    const rangeMinEnd = minId;
+                    const rangeMaxStart = maxId;
+                    const rangeMaxEnd = Math.min(maxId + 2, maxIndex);
+
+                    // 3. Lọc dataList để lấy các phần tử nằm trong 2 khoảng trên
+                    questionItem = dataList.filter(item => {
+                        const id = item.STT;
+
+                        if (rangeMinStart === rangeMinEnd) {
+                            return (id > rangeMaxStart && id <= rangeMaxEnd);
+                        } 
+    
+                        else if (rangeMaxStart === rangeMaxEnd) {
+                            return (id >= rangeMinStart && id < rangeMinEnd);
+                        } 
+                        return (id >= rangeMinStart && id < rangeMinEnd) || 
+                               (id > rangeMaxStart && id <= rangeMaxEnd);
+                }
+
+                // Kết quả trả về
+                console.log("Các ID thỏa mãn ban đầu:", satisfiedIds);
+                console.log("Danh sách câu hỏi được chọn (questionItem):", questionItem);
+
+                // 1. Trích xuất danh sách phrase từ questionItem
+                const phraseList = questionItem.map(item => item.phrase);
+                // 2. Nếu bạn muốn loại bỏ các giá trị trống hoặc trùng lặp (tùy chọn)
+                uniquePhrases = [...new Set(phraseList.filter(p => p))];
+
+                nowPhrases = allSatisfiedData.map(item => item.phrase);
+                console.log("Danh sách các cụm từ:", uniquePhrases);    
+                // if (allSatisfiedData.length > 0) {
                 //     // ĐẢO NGẪU NHIÊN
-                //     // shuffleArray(allData);
-                //     allData.sort((a, b) => {
+                //     // shuffleArray(allSatisfiedData);
+                //     allSatisfiedData.sort((a, b) => {
                 //         const stageA = Number(a['stage']);
                 //         const stageB = Number(b['stage']);
 
@@ -249,12 +292,12 @@
                 const loading = document.getElementById('loading');
                 loading.style.display = 'none';
 
-                if (allData.length === 0) {
+                if (allSatisfiedData.length === 0) {
                     document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
                     return;
                 }
                 
-                totalItems = allData.length + 1;
+                totalItems = allSatisfiedData.length + 1;
                 renderCard(currentIndex);
                 createDots();
             }
@@ -284,7 +327,7 @@
         `;
         }
         else {
-            const item = allData[index];
+            const item = allSatisfiedData[index];
             
             const examplesHtml = generateVocabHtml(item['examples']);
             const paragraphHtml = generateVocabHtml(item['short paragraph']);
@@ -359,13 +402,16 @@
     }
 
     function startExercise() {
-        if (!allData || allData.length === 0) {
+        if (!allSatisfiedData || allSatisfiedData.length === 0) {
                 alert("Không có dữ liệu để làm bài tập!");
                 return;
             }
     
-        // Bạn có thể thêm logic hiển thị câu hỏi trắc nghiệm ở đây
-        alert("Tính năng 'Bài tập' đang được khởi tạo cho " + allData.length + " từ!");
+        localStorage.setItem('satisfiedData', JSON.stringify(allSatisfiedData));
+        localStorage.setItem('uniquePhrases', JSON.stringify(uniquePhrases));
+
+        // Chuyển sang trang mới
+        window.location.href = 'part1_practice.html';
     }
     
     function nl2br(text) { return text ? text.replace(/\\n/g, '<br>') : ''; }
