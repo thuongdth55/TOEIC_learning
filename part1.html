@@ -5,7 +5,7 @@
     <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vocab Deepen</title>
+    <title>Part 1 TOEIC</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root {
@@ -262,19 +262,12 @@
     // Hàm render ĐÚNG 1 CARD duy nhất
     function renderCard(index) {
         const book = document.getElementById('book');
-        const item = allData[index];
-        
         // Reset vị trí cuộn lên đầu card mới
         book.scrollTop = 0;
-
-        const examplesHtml = generateVocabHtml(item['examples']);
-        const paragraphHtml = generateVocabHtml(item['short paragraph']);
-        const conversationsHtml = generateVocabHtml(item['short conversations']);
-
         // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
         if (index === totalItems - 1){
             book.innerHTML = `
-            <div class="footer-action">
+            <div>
                 <button class="exercise-btn" onclick="startExercise()">
                 <span class="icon">⭐</span> Bài tập ôn tập
                 </button>
@@ -282,6 +275,12 @@
         `;
         }
         else {
+            const item = allData[index];
+            
+            const examplesHtml = generateVocabHtml(item['examples']);
+            const paragraphHtml = generateVocabHtml(item['short paragraph']);
+            const conversationsHtml = generateVocabHtml(item['short conversations']);
+
             book.innerHTML = `
             <div class="flashcard" style="margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
                 <div class="header-section" style="display: flex; flex-direction: column; gap: 15px; align-items: flex-start;" onclick="speak_en('${item['phrase'].replace(/'/g, "\\'")}')">
