@@ -180,6 +180,16 @@
                 margin-right: 10px;
                 vertical-align: middle;
         }
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Bạn có thể đặt cụm này ở cuối trang hoặc giữa màn hình tùy ý */
+            margin-top: 50px; 
+        }
+        .exercise-btn.hidden {
+            display: none; /* Ẩn hoàn toàn khi không phải bước cuối */
+        }
         #loading { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; }
     </style>
 </head>
@@ -190,9 +200,15 @@
     </div>
 
 <div class="nav-control">
-    <button class="nav-btn" onpointerdown="prevPage()">←</button>
-    <div id="pageDots" class="dots"></div>
-    <button class="nav-btn" onpointerdown="nextPage()">→</button>
+    <button class="exercise-btn hidden">
+        <span class="icon">📝</span> Làm bài tập
+    </button>
+
+    <!-- <div class="nav-control"> -->
+        <button class="nav-btn" onpointerdown="prevPage()">←</button>
+            <div id="pageDots" class="dots"></div>
+        <button class="nav-btn" onpointerdown="nextPage()">→</button>
+    <!-- </div> -->
 </div>
 
 <script>
@@ -270,13 +286,7 @@
         book.scrollTop = 0;
         // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
         if (index === totalItems - 1){
-            book.innerHTML = `
-            <div>
-                <button class="exercise-btn" onclick="startExercise()">
-                <span class="icon">⭐</span> Bài tập ôn tập
-                </button>
-            </div>
-        `;
+            exerciseBtn.classList.remove('hidden');
         }
         else {
             const item = allData[index];
@@ -284,7 +294,8 @@
             const examplesHtml = generateVocabHtml(item['examples']);
             const paragraphHtml = generateVocabHtml(item['short paragraph']);
             const conversationsHtml = generateVocabHtml(item['short conversations']);
-
+            exerciseBtn.classList.add('hidden');
+            
             book.innerHTML = `
             <div class="flashcard" style="margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
                 <div class="header-section" style="display: flex; flex-direction: column; gap: 15px; align-items: flex-start;" onclick="speak_en('${item['phrase'].replace(/'/g, "\\'")}')">
