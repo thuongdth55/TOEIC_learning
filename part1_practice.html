@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luyện tập Part 1</title>
+    <title>Luyện tập Phản xạ Âm thanh</title>
     <style>
         :root {
             --primary-color: #007bff;
             --success-color: #28a745;
             --error-color: #dc3545;
-            --bg-color: #f8f9fa;
+            --bg-color: #f0f2f5;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             display: flex;
@@ -22,48 +22,54 @@
             min-height: 100vh;
         }
 
-        /* Thanh tiến trình */
+        /* Progress Bar */
         .progress-container {
             width: 100%;
-            height: 8px;
-            background-color: #e9ecef;
+            height: 6px;
+            background-color: #e0e0e0;
             position: fixed;
             top: 0;
+            z-index: 100;
         }
 
         #progress-bar {
             height: 100%;
             width: 0%;
             background-color: var(--primary-color);
-            transition: width 0.3s ease;
+            transition: width 0.4s ease;
         }
 
         .quiz-container {
-            max-width: 600px;
-            width: 90%;
-            margin-top: 50px;
+            max-width: 550px;
+            width: 95%;
+            margin: 40px auto;
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             text-align: center;
         }
 
         .question-info {
             font-size: 14px;
-            color: #6c757d;
+            font-weight: 600;
+            color: #888;
             margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         #question-image {
             width: 100%;
-            max-height: 350px;
+            height: 280px;
             object-fit: contain;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
         }
 
+        /* Grid Đáp án */
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -71,43 +77,85 @@
         }
 
         .option-btn {
-            padding: 15px;
-            font-size: 16px;
-            font-weight: 500;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
             background: white;
+            border: 2px solid #edf0f2;
+            border-radius: 15px;
+            padding: 20px 10px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
         }
 
         .option-btn:hover {
             border-color: var(--primary-color);
-            background-color: #f0f7ff;
+            background-color: #f8fbff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #e7f1ff;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .option-btn .audio-icon {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        /* Text đáp án - Mặc định ẩn */
+        .option-text {
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #444;
+            margin-top: 8px;
+            word-break: break-word;
+        }
+
+        /* Trạng thái sau khi bấm Check */
+        .revealed .option-text {
+            display: block;
         }
 
         .option-btn.correct {
-            background-color: var(--success-color) !important;
-            color: white;
-            border-color: var(--success-color);
+            border-color: var(--success-color) !important;
+            background-color: #e8f5e9 !important;
         }
 
         .option-btn.wrong {
-            background-color: var(--error-color) !important;
-            color: white;
-            border-color: var(--error-color);
+            border-color: var(--error-color) !important;
+            background-color: #ffebee !important;
         }
 
-        #next-btn {
-            margin-top: 20px;
-            padding: 10px 30px;
+        /* Nút điều khiển */
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .main-btn {
+            padding: 12px 35px;
             font-size: 16px;
-            background-color: var(--primary-color);
-            color: white;
+            font-weight: 600;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
-            display: none; /* Chỉ hiện sau khi trả lời */
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .main-btn:active { transform: scale(0.95); }
+
+        #check-btn { background-color: #495057; color: white; }
+        #next-btn { background-color: var(--primary-color); color: white; display: none; }
+
+        .result-screen {
+            padding: 40px 20px;
         }
     </style>
 </head>
@@ -117,28 +165,33 @@
         <div id="progress-bar"></div>
     </div>
 
-    <div class="quiz-container">
-        <div class="question-info" id="question-number">Câu hỏi 1/10</div>
+    <div class="quiz-container" id="quiz-box">
+        <div class="question-info" id="question-number">Loading...</div>
         
-        <img id="question-image" src="" alt="Câu hỏi hình ảnh">
+        <img id="question-image" src="" alt="Hình ảnh câu hỏi">
         
         <div class="options-grid" id="options-container">
             </div>
 
-        <button id="next-btn" onclick="nextQuestion()">Câu tiếp theo ➔</button>
+        <div class="controls">
+            <button id="check-btn" class="main-btn" onclick="validateSelection()">Kiểm tra đáp án</button>
+            <button id="next-btn" class="main-btn" onclick="nextQuestion()">Câu tiếp theo ➔</button>
+        </div>
     </div>
 
     <script>
         let quizSet = [];
         let currentIndex = 0;
         let score = 0;
+        let selectedValue = null;
+        let selectedBtn = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const rawSatisfied = localStorage.getItem('satisfiedData');
             const rawUnique = localStorage.getItem('uniquePhrases');
 
             if (!rawSatisfied || !rawUnique) {
-                alert("Không tìm thấy dữ liệu. Quay lại trang chủ.");
+                alert("Dữ liệu không khả dụng. Vui lòng quay lại!");
                 window.location.href = 'index.html';
                 return;
             }
@@ -146,10 +199,8 @@
             const satisfiedData = JSON.parse(rawSatisfied);
             const uniquePhrases = JSON.parse(rawUnique);
 
-            // 1. Tạo bộ câu hỏi
+            // Khởi tạo bộ câu hỏi x2 số lượng
             quizSet = generateQuiz(satisfiedData, uniquePhrases);
-            
-            // 2. Hiển thị câu đầu tiên
             renderQuestion();
         });
 
@@ -161,20 +212,17 @@
                 const current = satisfiedData[i % satisfiedData.length];
                 const correctAnswer = current.phrase;
 
-                // 2 đáp án nhiễu từ satisfiedData
                 let wrongSatisfied = [...new Set(satisfiedData
                     .filter(item => item.phrase !== correctAnswer)
                     .map(item => item.phrase))]
                     .sort(() => Math.random() - 0.5)
                     .slice(0, 2);
 
-                // 1 đáp án nhiễu từ uniquePhrases
                 let wrongUnique = phrases
                     .filter(p => p !== correctAnswer && !wrongSatisfied.includes(p))
                     .sort(() => Math.random() - 0.5)
                     .slice(0, 1);
 
-                // Gộp 4 lựa chọn và trộn ngẫu nhiên
                 const options = [correctAnswer, ...wrongSatisfied, ...wrongUnique]
                     .sort(() => Math.random() - 0.5);
 
@@ -187,47 +235,81 @@
             return set;
         }
 
+        function speak_en(text) {
+            if (!text) return;
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text.replace(/\//g, ','));
+            utter.lang = 'en-US';
+            utter.rate = 0.85;
+            window.speechSynthesis.speak(utter);
+        }
+
         function renderQuestion() {
             const currentTask = quizSet[currentIndex];
-            const optionsContainer = document.getElementById('options-container');
-            const nextBtn = document.getElementById('next-btn');
-
-            // Cập nhật giao diện
-            document.getElementById('question-image').src = currentTask.image;
-            document.getElementById('question-number').innerText = `Câu hỏi ${currentIndex + 1}/${quizSet.length}`;
-            document.getElementById('progress-bar').style.width = `${((currentIndex) / quizSet.length) * 100}%`;
+            const container = document.getElementById('options-container');
             
-            optionsContainer.innerHTML = '';
-            nextBtn.style.display = 'none';
+            // Reset trạng thái
+            selectedValue = null;
+            selectedBtn = null;
+            container.classList.remove('revealed');
+            document.getElementById('check-btn').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'none';
+            
+            // UI Update
+            document.getElementById('question-image').src = currentTask.image;
+            document.getElementById('question-number').innerText = `Câu hỏi ${currentIndex + 1} / ${quizSet.length}`;
+            document.getElementById('progress-bar').style.width = `${(currentIndex / quizSet.length) * 100}%`;
 
-            // Tạo các nút đáp án
-            currentTask.options.forEach(option => {
+            container.innerHTML = '';
+            currentTask.options.forEach(phrase => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
-                btn.innerText = option;
-                btn.onclick = () => checkAnswer(btn, option, currentTask.answer);
-                optionsContainer.appendChild(btn);
+                btn.innerHTML = `
+                    <span class="audio-icon">🔊</span>
+                    <span class="option-text">${phrase}</span>
+                `;
+                
+                btn.onclick = () => {
+                    speak_en(phrase);
+                    if (!container.classList.contains('revealed')) {
+                        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        selectedBtn = btn;
+                        selectedValue = phrase;
+                    }
+                };
+                container.appendChild(btn);
             });
         }
 
-        function checkAnswer(selectedBtn, selectedValue, correctAnswer) {
-            const buttons = document.querySelectorAll('.option-btn');
-            
-            // Vô hiệu hóa tất cả các nút sau khi đã chọn
-            buttons.forEach(btn => btn.disabled = true);
+        function validateSelection() {
+            if (!selectedBtn) {
+                alert("Hãy nghe và chọn một đáp án!");
+                return;
+            }
 
-            if (selectedValue === correctAnswer) {
-                selectedBtn.classList.add('correct');
+            const currentTask = quizSet[currentIndex];
+            const container = document.getElementById('options-container');
+            const buttons = document.querySelectorAll('.option-btn');
+
+            container.classList.add('revealed');
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                const text = btn.querySelector('.option-text').innerText;
+                
+                if (text === currentTask.answer) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            if (selectedValue === currentTask.answer) {
                 score++;
             } else {
                 selectedBtn.classList.add('wrong');
-                // Hiển thị đáp án đúng để người dùng học
-                buttons.forEach(btn => {
-                    if (btn.innerText === correctAnswer) btn.classList.add('correct');
-                });
             }
-
-            document.getElementById('next-btn').style.display = 'inline-block';
         }
 
         function nextQuestion() {
@@ -240,17 +322,21 @@
         }
 
         function showResult() {
-            const container = document.querySelector('.quiz-container');
+            const box = document.getElementById('quiz-box');
             const percent = Math.round((score / quizSet.length) * 100);
             
-            container.innerHTML = `
-                <h2>Hoàn thành bài tập!</h2>
-                <div style="font-size: 48px; margin: 20px 0;">${percent}%</div>
-                <p>Bạn trả lời đúng ${score}/${quizSet.length} câu hỏi.</p>
-                <button onclick="location.reload()" style="padding: 10px 20px; cursor:pointer;">Làm lại</button>
-                <button onclick="window.location.href='index.html'" style="padding: 10px 20px; cursor:pointer; margin-left:10px;">Về trang chủ</button>
-            `;
             document.getElementById('progress-bar').style.width = '100%';
+            box.innerHTML = `
+                <div class="result-screen">
+                    <h2>🎉 Hoàn thành!</h2>
+                    <div style="font-size: 50px; color: var(--primary-color); margin: 20px 0;">${percent}%</div>
+                    <p>Đúng <b>${score}</b> trên tổng số <b>${quizSet.length}</b> câu.</p>
+                    <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
+                        <button class="main-btn" style="background:#007bff; color:white;" onclick="location.reload()">Làm lại bài này</button>
+                        <button class="main-btn" style="background:#6c757d; color:white;" onclick="window.location.href='index.html'">Về trang chủ</button>
+                    </div>
+                </div>
+            `;
         }
     </script>
 </body>
