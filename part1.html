@@ -176,7 +176,7 @@
                 background-color: #0056b3;
         }
 
-        .exercise-btn .icon {
+        .exercise-btn.icon {
                 margin-right: 10px;
                 vertical-align: middle;
         }
@@ -199,16 +199,16 @@
 <div id="book">
     </div>
 
-<div class="nav-control">
+<div class="action-group">
     <button class="exercise-btn hidden">
         <span class="icon">📝</span> Làm bài tập
     </button>
 
-    <!-- <div class="nav-control"> -->
+    <div class="nav-control">
         <button class="nav-btn" onpointerdown="prevPage()">←</button>
             <div id="pageDots" class="dots"></div>
         <button class="nav-btn" onpointerdown="nextPage()">→</button>
-    <!-- </div> -->
+    </div>
 </div>
 
 <script>
@@ -282,6 +282,7 @@
     // Hàm render ĐÚNG 1 CARD duy nhất
     function renderCard(index) {
         const book = document.getElementById('book');
+        const exerciseBtn = document.querySelector('.exercise-btn');
         // Reset vị trí cuộn lên đầu card mới
         book.scrollTop = 0;
         // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
