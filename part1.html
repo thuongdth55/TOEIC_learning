@@ -153,12 +153,17 @@
         .ext-han { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: bold; }
         .ext-pinyin { font-size: 14px; color: var(--primary); }
         .speak-btn { background: none; border: 1px solid #eee; border-radius: 50%; cursor: pointer; }
+        .exercise-container {
+            display: flex;
+            justify-content: center; /* Giữa theo chiều ngang */
+            align-items: center;     /* Giữa theo chiều dọc */
+            min-height: 100vh;       /* Chiều cao toàn màn hình */
+        }
         .exercise-btn {
                 width: auto; 
                 min-width: fit-content;
                 max-width: 400px;
-                display: block;
-                margin: 20px auto;
+                display: inline-block;
                 padding: 15px 25px;
                 font-size: 18px;
                 font-weight: bold;
@@ -176,19 +181,9 @@
                 background-color: #0056b3;
         }
 
-        .exercise-btn.icon {
+        .exercise-btn .icon {
                 margin-right: 10px;
                 vertical-align: middle;
-        }
-        .action-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Bạn có thể đặt cụm này ở cuối trang hoặc giữa màn hình tùy ý */
-            margin-top: 50px; 
-        }
-        .exercise-btn.hidden {
-            display: none; /* Ẩn hoàn toàn khi không phải bước cuối */
         }
         #loading { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; }
     </style>
@@ -199,16 +194,10 @@
 <div id="book">
     </div>
 
-<div class="action-group">
-    <button class="exercise-btn hidden">
-        <span class="icon">📝</span> Làm bài tập
-    </button>
-
-    <div class="nav-control">
-        <button class="nav-btn" onpointerdown="prevPage()">←</button>
-            <div id="pageDots" class="dots"></div>
-        <button class="nav-btn" onpointerdown="nextPage()">→</button>
-    </div>
+<div class="nav-control">
+    <button class="nav-btn" onpointerdown="prevPage()">←</button>
+    <div id="pageDots" class="dots"></div>
+    <button class="nav-btn" onpointerdown="nextPage()">→</button>
 </div>
 
 <script>
@@ -282,12 +271,17 @@
     // Hàm render ĐÚNG 1 CARD duy nhất
     function renderCard(index) {
         const book = document.getElementById('book');
-        const exerciseBtn = document.querySelector('.exercise-btn');
         // Reset vị trí cuộn lên đầu card mới
         book.scrollTop = 0;
         // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
         if (index === totalItems - 1){
-            exerciseBtn.classList.remove('hidden');
+            book.innerHTML = `
+            <div class="exercise-container">
+                <button class="exercise-btn" onclick="startExercise()">
+                <span class="icon">⭐</span> Bài tập ôn tập
+                </button>
+            </div>
+        `;
         }
         else {
             const item = allData[index];
@@ -295,8 +289,7 @@
             const examplesHtml = generateVocabHtml(item['examples']);
             const paragraphHtml = generateVocabHtml(item['short paragraph']);
             const conversationsHtml = generateVocabHtml(item['short conversations']);
-            exerciseBtn.classList.add('hidden');
-            
+
             book.innerHTML = `
             <div class="flashcard" style="margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
                 <div class="header-section" style="display: flex; flex-direction: column; gap: 15px; align-items: flex-start;" onclick="speak_en('${item['phrase'].replace(/'/g, "\\'")}')">
@@ -446,6 +439,5 @@
 </script>
 </body>
 </html>
-
 
 
