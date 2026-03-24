@@ -255,19 +255,20 @@
                         } 
                         return (id >= rangeMinStart && id < rangeMinEnd) || 
                                (id > rangeMaxStart && id <= rangeMaxEnd);
+                    }
+
+                    // Kết quả trả về
+                    console.log("Các ID thỏa mãn ban đầu:", satisfiedIds);
+                    console.log("Danh sách câu hỏi được chọn (questionItem):", questionItem);
+
+                    // 1. Trích xuất danh sách phrase từ questionItem
+                    const phraseList = questionItem.map(item => item.phrase);
+                    // 2. Nếu bạn muốn loại bỏ các giá trị trống hoặc trùng lặp (tùy chọn)
+                    uniquePhrases = [...new Set(phraseList.filter(p => p))];
+
+                    nowPhrases = allSatisfiedData.map(item => item.phrase);
+                    console.log("Danh sách các cụm từ:", uniquePhrases);    
                 }
-
-                // Kết quả trả về
-                console.log("Các ID thỏa mãn ban đầu:", satisfiedIds);
-                console.log("Danh sách câu hỏi được chọn (questionItem):", questionItem);
-
-                // 1. Trích xuất danh sách phrase từ questionItem
-                const phraseList = questionItem.map(item => item.phrase);
-                // 2. Nếu bạn muốn loại bỏ các giá trị trống hoặc trùng lặp (tùy chọn)
-                uniquePhrases = [...new Set(phraseList.filter(p => p))];
-
-                nowPhrases = allSatisfiedData.map(item => item.phrase);
-                console.log("Danh sách các cụm từ:", uniquePhrases);    
                 // if (allSatisfiedData.length > 0) {
                 //     // ĐẢO NGẪU NHIÊN
                 //     // shuffleArray(allSatisfiedData);
