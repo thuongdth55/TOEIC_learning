@@ -210,100 +210,76 @@
     let nowPhrases = [];
     
     function init() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedStatus = urlParams.get('status') || 'Ready';
-        Papa.parse(sheetUrl, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                const maxIndex = results.length
-                // Lọc dữ liệu
-                // allSatisfiedData = results.data.filter(item => item['Status']?.trim() === selectedStatus);
-                allSatisfiedData = results.data.filter(item => {
-                        // Ép kiểu stage về số và trim Status để so sánh an toàn
-                        const stage = Number(item['showWordsToday']);
-                        const p = item['phrase']?.toString().trim();
-                        // Dùng && (Logical AND) thay vì & (Bitwise)
-                        return stage > 0 && !!p;
-                });
+    const urlParams = new URLSearchParams(window.location.search);  
+    Papa.parse(sheetUrl, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            const dataList = results.data; // Gán toàn bộ dữ liệu gốc vào đây
+            const maxIndex = dataList.length;
 
+            // Lọc dữ liệu chính (thỏa mãn điều kiện bài học hôm nay)
+            allSatisfiedData = dataList.filter(item => {
+                const stage = Number(item['showWordsToday']);
+                const p = item['phrase']?.toString().trim();
+                return stage > 0 && !!p;
+            });
+
+            // 1. Trích xuất danh sách các ID (STT) từ các phần tử thỏa mãn
+            const satisfiedIds = allSatisfiedData.map(item => Number(item.STT)).filter(id => !isNaN(id));
+            
+            let questionItem = [];
+            if (satisfiedIds.length > 0) {
+                const minId = Math.min(...satisfiedIds);
+                const maxId = Math.max(...satisfiedIds);
+
+                // 2. Xác định các khoảng giá trị
+                const rangeMinStart = Math.max(minId - 5, 1);
+                const rangeMinEnd = minId;
+                const rangeMaxStart = maxId;
+                const rangeMaxEnd = Math.min(maxId + 2, maxIndex);
+
+                // 3. Lọc từ dataList gốc để lấy các phần tử bổ trợ
+                questionItem = dataList.filter(item => {
+                    const id = Number(item.STT);
+                    if (isNaN(id)) return false;
+
+                    // Sửa lỗi cú pháp và logic loại bỏ điểm biên
+                    if (rangeMinStart === rangeMinEnd) {
+                        return (id > rangeMaxStart && id <= rangeMaxEnd);
+                    } else if (rangeMaxStart === rangeMaxEnd) {
+                        return (id >= rangeMinStart && id < rangeMinEnd);
+                    } 
+                    return (id >= rangeMinStart && id < rangeMinEnd) || 
+                           (id > rangeMaxStart && id <= rangeMaxEnd);
+                }); // ĐÃ THÊM ĐÓNG NGOẶC Ở ĐÂY
+
+                // Trích xuất uniquePhrases từ questionItem
+                const phraseList = questionItem.map(item => item.phrase?.trim());
+                uniquePhrases = [...new Set(phraseList.filter(p => p))];
+
+                nowPhrases = allSatisfiedData.map(item => item.phrase?.trim());
                 
-                // 1. Trích xuất danh sách các ID (STT) từ các phần tử thỏa mãn
-                const satisfiedIds = allSatisfiedData.map(item => item.STT);
-                let questionItem = [];
-                if (satisfiedIds.length > 0) {
-                    const minId = Math.min(...satisfiedIds);
-                    const maxId = Math.max(...satisfiedIds);
-
-                    // 2. Xác định các khoảng giá trị: [min-5; min] và [max; max+3]
-                    const rangeMinStart = Math.max(minId - 5, 1);
-                    const rangeMinEnd = minId;
-                    const rangeMaxStart = maxId;
-                    const rangeMaxEnd = Math.min(maxId + 2, maxIndex);
-
-                    // 3. Lọc dataList để lấy các phần tử nằm trong 2 khoảng trên
-                    questionItem = dataList.filter(item => {
-                        const id = item.STT;
-
-                        if (rangeMinStart === rangeMinEnd) {
-                            return (id > rangeMaxStart && id <= rangeMaxEnd);
-                        } 
-    
-                        else if (rangeMaxStart === rangeMaxEnd) {
-                            return (id >= rangeMinStart && id < rangeMinEnd);
-                        } 
-                        return (id >= rangeMinStart && id < rangeMinEnd) || 
-                               (id > rangeMaxStart && id <= rangeMaxEnd);
-                    }
-
-                    // Kết quả trả về
-                    console.log("Các ID thỏa mãn ban đầu:", satisfiedIds);
-                    console.log("Danh sách câu hỏi được chọn (questionItem):", questionItem);
-
-                    // 1. Trích xuất danh sách phrase từ questionItem
-                    const phraseList = questionItem.map(item => item.phrase);
-                    // 2. Nếu bạn muốn loại bỏ các giá trị trống hoặc trùng lặp (tùy chọn)
-                    uniquePhrases = [...new Set(phraseList.filter(p => p))];
-
-                    nowPhrases = allSatisfiedData.map(item => item.phrase);
-                    console.log("Danh sách các cụm từ:", uniquePhrases);    
-                }
-                // if (allSatisfiedData.length > 0) {
-                //     // ĐẢO NGẪU NHIÊN
-                //     // shuffleArray(allSatisfiedData);
-                //     allSatisfiedData.sort((a, b) => {
-                //         const stageA = Number(a['stage']);
-                //         const stageB = Number(b['stage']);
-
-                //         if (stageA !== stageB) {
-                //             // Sắp xếp theo stage tăng dần (1, 2, 3, 4, 5)
-                //             return stageA - stageB;
-                //         } else {
-                //             // Nếu cùng stage, trả về số ngẫu nhiên từ -0.5 đến 0.5
-                //             return Math.random() - 0.5;
-                //         }
-                //     });
-                    
-                // }
-                
-                // GIẢI PHÓNG BỘ NHỚ: Xóa kết quả gốc của PapaParse
-                results = null; 
-
-                const loading = document.getElementById('loading');
-                loading.style.display = 'none';
-
-                if (allSatisfiedData.length === 0) {
-                    document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
-                    return;
-                }
-                
-                totalItems = allSatisfiedData.length + 1;
-                renderCard(currentIndex);
-                createDots();
+                console.log("Các ID thỏa mãn:", satisfiedIds);
+                console.log("Unique Phrases bổ trợ:", uniquePhrases);
             }
-        });
-    }
+
+            // Giải phóng bộ nhớ và cập nhật giao diện
+            const loading = document.getElementById('loading');
+            if (loading) loading.style.display = 'none';
+
+            if (allSatisfiedData.length === 0) {
+                document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
+                return;
+            }
+            
+            totalItems = allSatisfiedData.length + 1;
+            renderCard(currentIndex);
+            createDots();
+        }
+    });
+}
 
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
