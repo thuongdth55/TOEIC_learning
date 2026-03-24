@@ -154,8 +154,11 @@
         .ext-pinyin { font-size: 14px; color: var(--primary); }
         .speak-btn { background: none; border: 1px solid #eee; border-radius: 50%; cursor: pointer; }
         .exercise-btn {
-                width: 90%;
+                width: auto; 
+                min-width: fit-content;
                 max-width: 400px;
+                display: block;
+                margin: 20px auto;
                 padding: 15px 25px;
                 font-size: 18px;
                 font-weight: bold;
@@ -175,6 +178,7 @@
 
         .exercise-btn .icon {
                 margin-right: 10px;
+                vertical-align: middle;
         }
         #loading { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; }
     </style>
