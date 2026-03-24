@@ -5,7 +5,7 @@
     <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Luyện tập part 1</title>
+    <title>Vocab Deepen</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root {
@@ -29,22 +29,18 @@
             width: 100%;
             overflow-y: auto; /* Chỉ cho phép cuộn bên trong nội dung thẻ nếu thẻ quá dài */
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 100px !important;
         }
 
         .flashcard {
-            /* min-height: 100vh;  <-- Xóa hoặc comment dòng này nếu muốn hiện danh sách liên tục */
+            min-height: 100vh;
             width: 100%;
             padding: 20px;
-            margin-bottom: 20px; /* Tạo khoảng cách giữa các thẻ */
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Thêm đổ bóng nhẹ để phân biệt các thẻ */
+            padding-bottom: 120px; 
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.3s ease; /* Hiệu ứng chuyển trang nhẹ nhàng */
         }
 
         @keyframes fadeIn {
@@ -121,6 +117,32 @@
         }
         .stroke-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: white; padding: 10px; border-radius: 15px; }
         .stroke-item { width: 100%; aspect-ratio: 1/1; object-fit: contain; }
+        
+        /* Nav Control tối ưu cho Android */
+        .nav-control {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 25px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 9999;
+        }
+
+        .nav-btn { 
+            background: none; border: none; font-size: 24px; cursor: pointer; color: #333; 
+            touch-action: manipulation; padding: 5px 15px;
+        }
+        
+        .dots { display: flex; gap: 8px; }
+        .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; }
+        .dot.active { background: var(--primary); width: 20px; border-radius: 10px; }
 
         .ext-vocab-item { background: #f9fafb; border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .ext-vocab-item:hover {
@@ -131,19 +153,6 @@
         .ext-han { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: bold; }
         .ext-pinyin { font-size: 14px; color: var(--primary); }
         .speak-btn { background: none; border: 1px solid #eee; border-radius: 50%; cursor: pointer; }
-        .footer-action {
-                position: fixed; /* Cố định ở đáy màn hình */
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                padding: 20px;
-                background: linear-gradient(transparent, rgba(255,255,255,0.9) 30%); /* Hiệu ứng mờ nhẹ */
-                display: flex;
-                justify-content: center;
-                box-sizing: border-box;
-                z-index: 1000;
-        }
-
         .exercise-btn {
                 width: 90%;
                 max-width: 400px;
@@ -191,12 +200,14 @@
 
     function init() {
         const urlParams = new URLSearchParams(window.location.search);
+        const selectedStatus = urlParams.get('status') || 'Ready';
         Papa.parse(sheetUrl, {
             download: true,
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
                 // Lọc dữ liệu
+                // allData = results.data.filter(item => item['Status']?.trim() === selectedStatus);
                 allData = results.data.filter(item => {
                         // Ép kiểu stage về số và trim Status để so sánh an toàn
                         const stage = Number(item['showWordsToday']);
@@ -204,41 +215,74 @@
                         // Dùng && (Logical AND) thay vì & (Bitwise)
                         return stage > 0 && !!p;
                 });
+                
+                // if (allData.length > 0) {
+                //     // ĐẢO NGẪU NHIÊN
+                //     // shuffleArray(allData);
+                //     allData.sort((a, b) => {
+                //         const stageA = Number(a['stage']);
+                //         const stageB = Number(b['stage']);
 
+                //         if (stageA !== stageB) {
+                //             // Sắp xếp theo stage tăng dần (1, 2, 3, 4, 5)
+                //             return stageA - stageB;
+                //         } else {
+                //             // Nếu cùng stage, trả về số ngẫu nhiên từ -0.5 đến 0.5
+                //             return Math.random() - 0.5;
+                //         }
+                //     });
+                    
+                // }
+                
                 // GIẢI PHÓNG BỘ NHỚ: Xóa kết quả gốc của PapaParse
                 results = null; 
 
                 const loading = document.getElementById('loading');
                 loading.style.display = 'none';
 
-                // if (allData.length === 0) {
-                //     document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
-                //     return;
-                // }
+                if (allData.length === 0) {
+                    document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
+                    return;
+                }
                 
-                totalItems = allData.length;
-                renderAllCards();
+                totalItems = allData.length + 1;
+                renderCard(currentIndex);
+                createDots();
             }
         });
     }
 
-  
-    // Hàm render 
-function renderAllCards() {
-    const book = document.getElementById('book');
-    
-    // 1. Kiểm tra xem có dữ liệu không
-    if (!allData || allData.length === 0) {
-        book.innerHTML = "<p>Không có dữ liệu để hiển thị.</p>";
-        return;
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+      }
     }
+  
+    // Hàm render ĐÚNG 1 CARD duy nhất
+    function renderCard(index) {
+        const book = document.getElementById('book');
+        const item = allData[index];
+        
+        // Reset vị trí cuộn lên đầu card mới
+        book.scrollTop = 0;
 
-    // 2. Dùng map để tạo mảng các chuỗi HTML và join chúng lại thành một chuỗi lớn
-    const allCardsHtml = allData.map((item) => {
-        // Bạn có thể giữ lại phần generateVocabHtml nếu cần dùng thêm ví dụ/đoạn văn bên dưới
-        // const examplesHtml = generateVocabHtml(item['examples']);
+        const examplesHtml = generateVocabHtml(item['examples']);
+        const paragraphHtml = generateVocabHtml(item['short paragraph']);
+        const conversationsHtml = generateVocabHtml(item['short conversations']);
 
-        return `
+        // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
+        if (index === totalItems - 1){
+            book.innerHTML = `
+            <div class="footer-action">
+                <button class="exercise-btn" onclick="startExercise()">
+                <span class="icon">⭐</span> Bài tập ôn tập
+                </button>
+            </div>
+        `;
+        }
+        else {
+            book.innerHTML = `
             <div class="flashcard" style="margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
                 <div class="header-section" style="display: flex; flex-direction: column; gap: 15px; align-items: flex-start;" onclick="speak_en('${item['phrase'].replace(/'/g, "\\'")}')">
                     
@@ -265,20 +309,57 @@ function renderAllCards() {
                 </div>
             </div>
         `;
-    }).join(''); // Nối tất cả các card thành một chuỗi HTML duy nhất
-
-    allCardsHtml += `<div class="footer-action">
-                <button class="exercise-btn" onclick="startExercise()">
-                <span class="icon">📝</span> Bài tập ôn tập
-                </button>
-        </div>`
-    // 3. Ghi đè vào nội dung của book
-    book.innerHTML = allCardsHtml;
+        }
+        
+        
+        updateDots();
+    }
     
-    // Cuộn lên đầu trang
-    book.scrollTop = 0;
-}
+    function nextPage() {
+        if (currentIndex < totalItems - 1) {
+            currentIndex++;
+            renderCard(currentIndex);
+        }
+    }
 
+    function prevPage() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderCard(currentIndex);
+        }
+    }
+
+    function createDots() {
+        const dotsContainer = document.getElementById('pageDots');
+        dotsContainer.innerHTML = '';
+        const limit = Math.min(totalItems, 5); 
+        for (let i = 0; i < limit; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.onpointerdown = () => { currentIndex = i; renderCard(i); };
+            dotsContainer.appendChild(dot);
+        }
+        updateDots();
+    }
+
+    function updateDots() {
+        const dots = document.querySelectorAll('.dot');
+        const activeIdx = currentIndex % 5; // Giả lập vòng lặp 5 dots
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === activeIdx);
+        });
+    }
+
+    function startExercise() {
+        if (!allData || allData.length === 0) {
+                alert("Không có dữ liệu để làm bài tập!");
+                return;
+            }
+    
+        // Bạn có thể thêm logic hiển thị câu hỏi trắc nghiệm ở đây
+        alert("Tính năng 'Bài tập' đang được khởi tạo cho " + allData.length + " từ!");
+    }
+    
     function nl2br(text) { return text ? text.replace(/\\n/g, '<br>') : ''; }
 
     function parseExtendedVocab(text) {
@@ -332,16 +413,6 @@ function renderAllCards() {
         window.speechSynthesis.speak(utter);
     }
 
-    function startExercise() {
-        if (!allData || allData.length === 0) {
-                alert("Không có dữ liệu để làm bài tập!");
-                return;
-            }
-    
-        // Bạn có thể thêm logic hiển thị câu hỏi trắc nghiệm ở đây
-        alert("Tính năng 'Bài tập' đang được khởi tạo cho " + allData.length + " từ!");
-    }
-    
     function generateVocabHtml(rawData) {
         const list = parseExtendedVocab(rawData);
         if (!list.length) {
