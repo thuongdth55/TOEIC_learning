@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luyện tập Phản xạ Âm thanh</title>
+    <title>Luyện tập part 1</title>
     <style>
         :root {
             --primary-color: #007bff;
@@ -204,35 +204,46 @@
             renderQuestion();
         });
 
-        function generateQuiz(satisfiedData, phrases) {
-            const set = [];
-            const total = satisfiedData.length * 2;
+    function generateQuiz(satisfiedData, phrases) {
+        const set = [];
+    
+        // Bước 1: Trộn danh sách gốc trước
+        const shuffledSource = [...satisfiedData].sort(() => Math.random() - 0.5);
+    
+        // Bước 2: Tạo bộ câu hỏi (Lặp qua danh sách đã trộn 2 lần)
+        // Việc lặp 2 lần như thế này giúp logic rõ ràng hơn i % length
+        const doubleSource = [...shuffledSource, ...shuffledSource];
 
-            for (let i = 0; i < total; i++) {
-                const current = satisfiedData[i % satisfiedData.length];
-                const correctAnswer = current.phrase;
+        for (let i = 0; i < doubleSource.length; i++) {
+            const current = doubleSource[i];
+            const correctAnswer = current.phrase;
 
-                let wrongSatisfied = [...new Set(satisfiedData
-                    .filter(item => item.phrase !== correctAnswer)
-                    .map(item => item.phrase))]
-                    .sort(() => Math.random() - 0.5)
-                    .slice(0, 2);
+            // Lấy 2 đáp án nhiễu từ satisfiedData (tránh trùng đáp án đúng)
+            let wrongSatisfied = [...new Set(satisfiedData
+                .filter(item => item.phrase !== correctAnswer)
+                .map(item => item.phrase))]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 2);
 
-                let wrongUnique = phrases
-                    .filter(p => p !== correctAnswer && !wrongSatisfied.includes(p))
-                    .sort(() => Math.random() - 0.5)
-                    .slice(0, 1);
+            // Lấy 1 đáp án nhiễu từ phrases (tránh trùng đáp án đúng và nhiễu trên)
+            let wrongUnique = phrases
+                .filter(p => p !== correctAnswer && !wrongSatisfied.includes(p))
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 1);
 
-                const options = [correctAnswer, ...wrongSatisfied, ...wrongUnique]
-                    .sort(() => Math.random() - 0.5);
+            // Trộn 4 đáp án cho câu hỏi này
+            const options = [correctAnswer, ...wrongSatisfied, ...wrongUnique]
+                .sort(() => Math.random() - 0.5);
 
-                set.push({
-                    image: current.image,
-                    answer: correctAnswer,
-                    options: options
-                });
-            }
-            return set;
+            set.push({
+                image: current.image,
+                answer: correctAnswer,
+                options: options
+            });
+        }
+
+        // Bước 3: Đảo toàn bộ bộ câu hỏi cuối cùng một lần nữa
+        return set.sort(() => Math.random() - 0.5);
         }
 
         function speak_en(text) {
@@ -333,7 +344,7 @@
                     <p>Đúng <b>${score}</b> trên tổng số <b>${quizSet.length}</b> câu.</p>
                     <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
                         <button class="main-btn" style="background:#007bff; color:white;" onclick="location.reload()">Làm lại bài này</button>
-                        <button class="main-btn" style="background:#6c757d; color:white;" onclick="window.location.href='index.html'">Về trang chủ</button>
+                        <button class="main-btn" style="background:#6c757d; color:white;" onclick="window.location.href='part1.html'">Về trang chủ</button>
                     </div>
                 </div>
             `;
