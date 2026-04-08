@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TOEIC learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-main: #2d3436;
+            --grad-part1: linear-gradient(-135deg, #d7d2cc 0%, #304352 100%);
+            --grad-part2: linear-gradient(-135deg, #ff8177 0%, #ff867a 0%, #ff8c7f 21%, #f99185 52%, #cf556c 78%, #b12a5b 100%);
+            --grad-part3: linear-gradient(135deg, #002b99 0%, #00ecbc 100%);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 50%, #e0e0e0 1px, transparent 1px);
+            background-size: 30px 30px; /* Tạo họa tiết nền chấm nhẹ nhàng */
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h2 {
+            font-weight: 800;
+            font-size: 28px;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            color: #636e72;
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .menu-btn {
+            position: relative;
+            padding: 24px;
+            border: none;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Hiệu ứng Hover */
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+
+        .menu-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* Màu sắc Gradient đặc trưng */
+        .bg-part1 { background: var(--grad-part1); }
+        .bg-part2 { background: var(--grad-part2); }
+        .bg-part3 { background: var(--grad-part3); }
+
+        /* Icon giả lập bằng CSS */
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Hiệu ứng ánh sáng bóng loáng */
+        .menu-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .menu-btn:hover::after {
+            left: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>TOEIC Practice</h2>
+        <p class="subtitle">Chọn phần muốn học</p>
+        
+        <div class="menu-container">
+            <a href="https://thuongdth55.github.io/TOEIC_learning/part1.html" class="menu-btn bg-part1">
+                <span>Part 1</span>
+                <div class="btn-icon">➜</div>
+            </a>
+            
+            <a href="https://thuongdth55.github.io/TOEIC_learning/part2.html" class="menu-btn bg-part2">
+                <span>Part 2</span>
+                <div class="btn-icon">➜</div>
+            </a>
+            
+            <a href="https://thuongdth55.github.io/TOEIC_learning/part3.html" class="menu-btn bg-part3">
+                <span>Part 3</span>
+                <div class="btn-icon">➜</div>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
